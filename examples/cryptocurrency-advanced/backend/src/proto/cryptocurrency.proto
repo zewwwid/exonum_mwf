@@ -101,9 +101,37 @@ message Duel {
   /// Номер ситуации.
   uint64 situation_number = 8;
 
+  /// Количество голосов за первого игрока.
+  uint64 player1_votes = 9;
+
+  /// Количество голосов за второго игрока.
+  uint64 player2_votes = 10;
+
   /// Количество транзакция связанных с поединком.
-  uint64 history_len = 9;
+  uint64 history_len = 11;
 
   // `Hash` of the transactions history.
-  exonum.Hash history_hash = 10;
+  exonum.Hash history_hash = 12;
+}
+
+
+/// Транзакция голосования.
+message CreateVote {
+  /// Ключ поединка.
+  exonum.PublicKey duel_key = 1;
+
+  /// Ключ играка.
+  exonum.PublicKey player_key = 2;
+}
+
+/// Голос.
+message Vote {
+  /// Ключ поединка.
+  exonum.PublicKey duel_key = 1;
+
+  /// Ключ судьи.
+  exonum.PublicKey judge_key = 2;
+
+  /// Ключ играка.
+  exonum.PublicKey player_key = 3;
 }

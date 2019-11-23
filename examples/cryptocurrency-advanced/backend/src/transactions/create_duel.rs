@@ -78,9 +78,9 @@ impl Transaction for CreateDuel {
             Err(Error::NeedTwoPlayers)?;
         }
 
-        if self.judge1_key == self.judge2_key || self.judge1_key == self.judge3_key || self.judge2_key == self.judge3_key {
-            //Err(Error(err_msg("Поединок должны судить трое разных судей")))?;
-        }
+//        if self.judge1_key == self.judge2_key || self.judge1_key == self.judge3_key || self.judge2_key == self.judge3_key {
+//            //Err(Error(err_msg("Поединок должны судить трое разных судей")))?;
+//        }
 
         schema.create_duel(
             &key,

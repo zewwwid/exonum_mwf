@@ -29,6 +29,12 @@ pub struct Duel {
     /// Номер ситуации.
     pub situation_number: u64,
 
+    /// Количество голосов за первого игрока.
+    pub player1_votes: u64,
+
+    /// Количество голосов за второго игрока.
+    pub player2_votes: u64,
+
     /// Количество транзакция связанных с поединком.
     pub history_len: u64,
 
@@ -51,6 +57,9 @@ impl Duel {
         &history_hash: &Hash,
     ) -> Self
     {
+        let player1_votes = 0 as u64;
+        let player2_votes = 0 as u64;
+
         Self {
             key,
             arbiter_key,
@@ -60,6 +69,8 @@ impl Duel {
             judge2_key,
             judge3_key,
             situation_number,
+            player1_votes,
+            player2_votes,
             history_len,
             history_hash,
         }
@@ -120,5 +131,33 @@ where
                 &history_hash)
         };
         self.duels().put(key, duel);
+    }
+
+    /// Добавляет голос за первого игрока.
+    pub fn add_player1_vote(&self, duel: &Duel, transaction: &Hash) {
+        let mut history = self.duel_history(&duel.key);
+        history.push(*transaction);
+        let history_hash = history.object_hash();
+
+        let mut clone = duel.clone();
+        clone.player1_votes = clone.player1_votes + 1;
+        clone.history_len = clone.history_len + 1;
+        clone.history_hash = history_hash;
+
+        self.duels().put(&clone.key, clone.clone());
+    }
+
+    /// Добавляет голос за второго игрока.
+    pub fn add_player2_vote(&self, duel: &Duel, transaction: &Hash) {
+        let mut history = self.duel_history(&duel.key);
+        history.push(*transaction);
+        let history_hash = history.object_hash();
+
+        let mut clone = duel.clone();
+        clone.player2_votes = clone.player2_votes + 1;
+        clone.history_len = clone.history_len + 1;
+        clone.history_hash = history_hash;
+
+        self.duels().put(&clone.key, clone.clone());
     }
 }

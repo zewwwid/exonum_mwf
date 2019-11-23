@@ -20,6 +20,7 @@
 
 
 pub mod create_duel;
+pub mod create_vote;
 
 use exonum::{
     blockchain::{ExecutionError, ExecutionResult, Transaction, TransactionContext},
@@ -71,6 +72,30 @@ pub enum Error {
     /// Can be emitted by `CreateDuel`.
     #[fail(display = "В поединке должно участвовать 2 игрока")]
     NeedTwoPlayers = 5,
+
+    /// Поединок не найден.
+    ///
+    /// Can be emitted by `CreateDuel`.
+    #[fail(display = "Поединок не найден")]
+    DuelNotFound = 6,
+
+    /// Игрок не участвовал в поединке.
+    ///
+    /// Can be emitted by `CreateDuel`.
+    #[fail(display = "Игрок не участвовал в поединке")]
+    PlayerInDuelNotFound = 7,
+
+    /// Судья не судил поединок.
+    ///
+    /// Can be emitted by `CreateDuel`.
+    #[fail(display = "Судья не судил поединок")]
+    JudgeInDuelNotFound = 8,
+
+    /// Судья уже проголосовал в данном поединке.
+    ///
+    /// Can be emitted by `CreateDuel`.
+    #[fail(display = "Судья уже проголосовал в данном поединке")]
+    JudgeVoteInDuelAlreadyExists = 9,
 }
 
 impl From<Error> for ExecutionError {
@@ -123,8 +148,10 @@ pub enum WalletTransactions {
     Issue(Issue),
     /// CreateWallet tx.
     CreateWallet(CreateWallet),
-    /// Транзакция создания поединка.
+    /// Транзакция голосования.
     CreateDuel(create_duel::CreateDuel),
+    /// Транзакция создания поединка.
+    CreateVote(create_vote::CreateVote),
 }
 
 impl CreateWallet {
