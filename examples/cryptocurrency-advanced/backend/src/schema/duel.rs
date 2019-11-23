@@ -57,9 +57,6 @@ impl Duel {
         &history_hash: &Hash,
     ) -> Self
     {
-        let player1_votes = 0 as u64;
-        let player2_votes = 0 as u64;
-
         Self {
             key,
             arbiter_key,
@@ -69,8 +66,8 @@ impl Duel {
             judge2_key,
             judge3_key,
             situation_number,
-            player1_votes,
-            player2_votes,
+            player1_votes: 0 as u64,
+            player2_votes: 0 as u64,
             history_len,
             history_hash,
         }

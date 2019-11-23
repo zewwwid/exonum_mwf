@@ -8,6 +8,9 @@ use super::super::proto;
 #[derive(Clone, Debug, ProtobufConvert)]
 #[exonum(pb = "proto::Vote", serde_pb_convert)]
 pub struct Vote {
+    /// Ключ голоса.
+    pub key: PublicKey,
+
     /// Ключ поединка.
     pub duel_key: PublicKey,
 
@@ -26,7 +29,10 @@ impl Vote {
         &player_key: &PublicKey,
     ) -> Self
     {
+        let (key, _) = exonum::crypto::gen_keypair();
+
         Self {
+            key,
             duel_key,
             judge_key,
             player_key,
@@ -38,19 +44,9 @@ impl<T> Schema<T>
 where
     T: IndexAccess,
 {
-    /// Возвращает голоса в поединке.
-    pub fn duel_votes(&self) -> ProofMapIndex<T, PublicKey, Vote> {
-        ProofMapIndex::new("mwf.duel_votes", self.access.clone())
-    }
-
-    /// Возвращает голоса судьи.
-    pub fn judge_votes(&self) -> ProofMapIndex<T, PublicKey, Vote> {
-        ProofMapIndex::new("mwf.judge_votes", self.access.clone())
-    }
-
-    /// Возвращает голоса за игрока.
-    pub fn player_votes(&self) -> ProofMapIndex<T, PublicKey, Vote> {
-        ProofMapIndex::new("mwf.player_votes", self.access.clone())
+    /// Возвращает голоса.
+    pub fn votes(&self) -> ProofMapIndex<T, PublicKey, Vote> {
+        ProofMapIndex::new("mwf.votes", self.access.clone())
     }
 
     /// Создает голос.
@@ -61,15 +57,12 @@ where
         player_key: &PublicKey
     )
     {
-        let vote = {
-            Vote::new(
-                duel_key,
-                judge_key,
-                player_key
-            )
-        };
-        self.duel_votes().put(duel_key, vote.clone());
-        self.judge_votes().put(judge_key, vote.clone());
-        self.player_votes().put(player_key, vote.clone());
+        let vote = Vote::new(
+            duel_key,
+            judge_key,
+            player_key
+        );
+
+        self.votes().put(&vote.key, vote.clone());
     }
 }

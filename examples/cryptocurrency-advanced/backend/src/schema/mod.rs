@@ -16,6 +16,7 @@
 
 pub mod duel;
 pub mod vote;
+pub mod rating;
 
 use exonum_merkledb::{IndexAccess, ObjectHash, ProofListIndex, ProofMapIndex};
 

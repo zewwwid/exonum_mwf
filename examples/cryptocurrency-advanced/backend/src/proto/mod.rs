@@ -17,7 +17,7 @@
 #![allow(bare_trait_objects)]
 #![allow(renamed_and_removed_lints)]
 
-pub use self::cryptocurrency::{CreateWallet, Issue, Transfer, Wallet, Duel, CreateDuel, CreateVote, Vote};
+pub use self::cryptocurrency::{CreateWallet, Issue, Transfer, Wallet, Duel, CreateDuel, CreateVote, Vote, Rating};
 
 include!(concat!(env!("OUT_DIR"), "/protobuf_mod3.rs"));
 

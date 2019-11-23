@@ -61,7 +61,12 @@ impl Transaction for CreateVote {
                 Err(Error::JudgeInDuelNotFound)?;
             }
 
-            // TODO: Проверяем, что судья еще не голосовал в поединке
+            // Проверяем, что судья еще не голосовал в поединке
+            for vote in schema.votes().iter() {
+                if vote.1.duel_key == duel_key &&  vote.1.judge_key == judge_key {
+                    Err(Error::JudgeVoteInDuelAlreadyExists)?;
+                }
+            }
 
             // Сохраняем голос.
             schema.create_vote(
@@ -76,6 +81,19 @@ impl Transaction for CreateVote {
             } else {
                 schema.add_player2_vote(&duel,&hash);
             };
+
+            let duel = schema.duel(&duel_key).unwrap();
+            // Если проголосовали все судьи, то определяем победителя и увеличиваем его рейтинг
+            if duel.player1_votes + duel.player2_votes == 3 {
+                // Если победил игрок 1
+                if duel.player1_votes > duel.player2_votes {
+                    schema.increment_rating(&duel.player1_key);
+                }
+                // Если победил игрок 2
+                else {
+                    schema.increment_rating(&duel.player2_key);
+                }
+            }
 
             Ok(())
 

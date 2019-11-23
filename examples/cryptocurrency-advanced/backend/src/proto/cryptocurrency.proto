@@ -126,12 +126,24 @@ message CreateVote {
 
 /// Голос.
 message Vote {
+  /// Ключ голоса.
+  exonum.PublicKey key = 1;
+
   /// Ключ поединка.
-  exonum.PublicKey duel_key = 1;
+  exonum.PublicKey duel_key = 2;
 
   /// Ключ судьи.
-  exonum.PublicKey judge_key = 2;
+  exonum.PublicKey judge_key = 3;
 
   /// Ключ играка.
-  exonum.PublicKey player_key = 3;
+  exonum.PublicKey player_key = 4;
+}
+
+/// Рейтинг игрока.
+message Rating {
+  /// Ключ играка.
+  exonum.PublicKey player_key = 1;
+
+  /// Рейтинг.
+  uint64 value = 2;
 }
