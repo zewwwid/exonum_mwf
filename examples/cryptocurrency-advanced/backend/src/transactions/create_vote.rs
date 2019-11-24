@@ -68,6 +68,10 @@ impl Transaction for CreateVote {
                 }
             }
 
+            if duel.judge1_key == judge_key {
+
+            }
+
             // Сохраняем голос.
             schema.create_vote(
                 &duel_key,
@@ -75,12 +79,22 @@ impl Transaction for CreateVote {
                 &player_key
             );
 
-            // Наращиваем количество голосов за игрока
-            if duel.player1_key == player_key {
-                schema.add_player1_vote(&duel,&hash);
+            let player_num = if duel.player1_key == player_key {
+                1
             } else {
-                schema.add_player2_vote(&duel,&hash);
+                2
             };
+
+            let judge_num = if duel.judge1_key == judge_key {
+                1
+            } else if duel.judge2_key == judge_key {
+                2
+            } else {
+                3
+            };
+
+            // Добавляем голос к поединку
+            schema.add_vote(&duel, player_num, judge_num, &hash);
 
             let duel = schema.duel(&duel_key).unwrap();
             // Если проголосовали все судьи, то определяем победителя и увеличиваем его рейтинг

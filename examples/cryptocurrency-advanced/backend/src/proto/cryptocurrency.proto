@@ -107,11 +107,26 @@ message Duel {
   /// Количество голосов за второго игрока.
   uint64 player2_votes = 10;
 
+  /// Имя игрока 1.
+  string player1_name = 11;
+
+  /// Имя игрока 2.
+  string player2_name = 12;
+
+  /// Судья 1 проголосовал.
+  bool judge1_voted = 13;
+
+  /// Судья 2 проголосовал.
+  bool judge2_voted = 14;
+
+  /// Судья 3 проголосовал.
+  bool judge3_voted = 15;
+
   /// Количество транзакция связанных с поединком.
-  uint64 history_len = 11;
+  uint64 history_len = 16;
 
   // `Hash` of the transactions history.
-  exonum.Hash history_hash = 12;
+  exonum.Hash history_hash = 17;
 }
 
 

@@ -71,6 +71,10 @@ pub struct DuelQuery {
     pub key: PublicKey,
 }
 
+/// Запрос всех поединков.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub struct AllDuelsQuery;
+
 /// Запрос поединков судьи в которых он еще не проголосовал.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub struct JudgeDuelsQuery {
@@ -114,6 +118,21 @@ pub struct DuelInfo {
 
     /// Количество голосов за второго игрока.
     pub player2_votes: u64,
+
+    /// Имя игрока 1.
+    pub player1_name: String,
+
+    /// Имя игрока 2.
+    pub player2_name: String,
+
+    /// Судья 1 проголосовал.
+    pub judge1_voted: bool,
+
+    /// Судья 2 проголосовал.
+    pub judge2_voted: bool,
+
+    /// Судья 3 проголосовал.
+    pub judge3_voted: bool,
 }
 
 /// Рейтинг.
@@ -194,6 +213,11 @@ impl PublicApi {
                 judge1_key: duel.judge1_key,
                 judge2_key: duel.judge2_key,
                 judge3_key: duel.judge3_key,
+                player1_name: duel.player1_name,
+                player2_name: duel.player2_name,
+                judge1_voted: duel.judge1_voted,
+                judge2_voted: duel.judge2_voted,
+                judge3_voted: duel.judge3_voted,
                 situation_number: duel.situation_number,
                 player1_votes: duel.player1_votes,
                 player2_votes: duel.player2_votes,
@@ -228,6 +252,11 @@ impl PublicApi {
                 judge1_key: x.1.judge1_key,
                 judge2_key: x.1.judge2_key,
                 judge3_key: x.1.judge3_key,
+                player1_name: x.1.player1_name,
+                player2_name: x.1.player2_name,
+                judge1_voted: x.1.judge1_voted,
+                judge2_voted: x.1.judge2_voted,
+                judge3_voted: x.1.judge3_voted,
                 situation_number: x.1.situation_number,
                 player1_votes: x.1.player1_votes,
                 player2_votes: x.1.player2_votes,
@@ -253,6 +282,102 @@ impl PublicApi {
         }
     }
 
+    /// Возвращает незавершенные поединки в которых в какой либо роли участвует аккаунт.
+    pub fn my_active_duels(state: &ServiceApiState, query: DuelQuery) -> api::Result<Vec<DuelInfo>> {
+        let snapshot = state.snapshot();
+        let currency_schema = Schema::new(&snapshot);
+
+        // Фильтруем поединки оставляя только те с которами связан переданный аккаунт
+        let duels = currency_schema.duels().iter()
+            .filter(|x|
+                x.1.arbiter_key == query.key ||
+                x.1.player1_key == query.key ||
+                x.1.player2_key == query.key ||
+                x.1.judge1_key == query.key ||
+                x.1.judge2_key == query.key ||
+                x.1.judge3_key == query.key)
+            .map(|x| DuelInfo {
+                key: x.1.key,
+                arbiter_key: x.1.arbiter_key,
+                player1_key: x.1.player1_key,
+                player2_key: x.1.player2_key,
+                judge1_key: x.1.judge1_key,
+                judge2_key: x.1.judge2_key,
+                judge3_key: x.1.judge3_key,
+                player1_name: x.1.player1_name,
+                player2_name: x.1.player2_name,
+                judge1_voted: x.1.judge1_voted,
+                judge2_voted: x.1.judge2_voted,
+                judge3_voted: x.1.judge3_voted,
+                situation_number: x.1.situation_number,
+                player1_votes: x.1.player1_votes,
+                player2_votes: x.1.player2_votes,
+            })
+            .collect::<Vec<_>>();
+
+        Ok(duels)
+    }
+
+    /// Возвращает все незавершенные поединки.
+    pub fn all_active_duels(state: &ServiceApiState, _query: AllDuelsQuery) -> api::Result<Vec<DuelInfo>> {
+        let snapshot = state.snapshot();
+        let currency_schema = Schema::new(&snapshot);
+
+        // Фильтруем поединки оставляя только незавершенные
+        let duels = currency_schema.duels().iter()
+            .filter(|x| x.1.player1_votes + x.1.player2_votes < 3)
+            .map(|x| DuelInfo {
+                key: x.1.key,
+                arbiter_key: x.1.arbiter_key,
+                player1_key: x.1.player1_key,
+                player2_key: x.1.player2_key,
+                judge1_key: x.1.judge1_key,
+                judge2_key: x.1.judge2_key,
+                judge3_key: x.1.judge3_key,
+                player1_name: x.1.player1_name,
+                player2_name: x.1.player2_name,
+                judge1_voted: x.1.judge1_voted,
+                judge2_voted: x.1.judge2_voted,
+                judge3_voted: x.1.judge3_voted,
+                situation_number: x.1.situation_number,
+                player1_votes: x.1.player1_votes,
+                player2_votes: x.1.player2_votes,
+            })
+            .collect::<Vec<_>>();
+
+        Ok(duels)
+    }
+
+    /// Возвращает все завершенные поединки.
+    pub fn all_finish_duels(state: &ServiceApiState, _query: AllDuelsQuery) -> api::Result<Vec<DuelInfo>> {
+        let snapshot = state.snapshot();
+        let currency_schema = Schema::new(&snapshot);
+
+        // Фильтруем поединки оставляя только незавершенные
+        let duels = currency_schema.duels().iter()
+            .filter(|x| x.1.player1_votes + x.1.player2_votes >= 3)
+            .map(|x| DuelInfo {
+                key: x.1.key,
+                arbiter_key: x.1.arbiter_key,
+                player1_key: x.1.player1_key,
+                player2_key: x.1.player2_key,
+                judge1_key: x.1.judge1_key,
+                judge2_key: x.1.judge2_key,
+                judge3_key: x.1.judge3_key,
+                player1_name: x.1.player1_name,
+                player2_name: x.1.player2_name,
+                judge1_voted: x.1.judge1_voted,
+                judge2_voted: x.1.judge2_voted,
+                judge3_voted: x.1.judge3_voted,
+                situation_number: x.1.situation_number,
+                player1_votes: x.1.player1_votes,
+                player2_votes: x.1.player2_votes,
+            })
+            .collect::<Vec<_>>();
+
+        Ok(duels)
+    }
+
     /// Wires the above endpoint to public scope of the given `ServiceApiBuilder`.
     pub fn wire(builder: &mut ServiceApiBuilder) {
         builder
@@ -260,6 +385,9 @@ impl PublicApi {
             .endpoint("v1/wallets/info", Self::wallet_info)
             .endpoint("v1/duel/info", Self::duel_info)
             .endpoint("v1/judge/duels", Self::judge_duels)
-            .endpoint("v1/rating", Self::rating);
+            .endpoint("v1/rating", Self::rating)
+            .endpoint("v1/my_active_duels", Self::my_active_duels)
+            .endpoint("v1/all_active_duels", Self::all_active_duels)
+            .endpoint("v1/all_finish_duels", Self::all_finish_duels);
     }
 }
